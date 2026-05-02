@@ -1,0 +1,203 @@
+package Assignment_7_StudentCRUD;
+
+
+import java.io.*;
+import java.util.*;
+
+public class StudentCSVCRUD{
+
+    static String fileName = "Students.csv";
+
+    public static void main(String[] args){
+
+        System.out.println("Initial File Data :- \n");
+        displayFile();
+
+        // CREATE - Add 3 more rows with marks4 and marks5 = 0
+        System.out.println("\nAdding 3 rows :-");
+        addStudent("103", "Rahul", "ECE", 78, 95, 80, 0, 0);
+        addStudent("104", "Sneha", "MECH", 80, 72, 68, 0, 0);
+        addStudent("105", "Karan", "CIVIL", 90, 80, 92, 0, 0);
+
+        displayFile();
+
+        // UPDATE - Update marks4 and marks5 for all students
+        System.out.println("\nUpdating marks (4&5) for all students :- ");
+        updateMarks("101", 80, 85);
+        updateMarks("102", 89, 92);
+        updateMarks("103", 78, 81);
+        updateMarks("104", 74, 70);
+        updateMarks("105", 95, 93);
+
+        displayFile();
+
+        // Calculate and update percentage
+        System.out.println("\nCalculate Percentage :- ");
+        calculatePercentage();
+
+        displayFile();
+
+        // DELETE one row
+        System.out.println("\nDeleting student with ID 104 :- ");
+        deleteStudent("104");
+
+        displayFile();
+
+        // Exception condition
+        System.out.println("\nException :- ");
+        readWrongFile();
+    }
+
+    // CREATE
+    static void addStudent(String id, String name, String branch,
+                           int m1, int m2, int m3, int m4, int m5) {
+
+        try {
+            FileWriter fw = new FileWriter(fileName, true);
+            fw.write(id + "," + name + "," + branch + "," +
+                    m1 + "," + m2 + "," + m3 + "," + m4 + "," + m5 + ",0\n");
+            fw.close();
+
+            System.out.println("Added Student: " + id + " " + name);
+
+        } catch (IOException e) {
+            System.out.println("IOException while adding student: " + e.getMessage());
+        }
+    }
+
+    // READ
+    static void displayFile() {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(fileName));
+            String line;
+
+            while ((line = br.readLine()) != null) {
+                System.out.println(line);
+            }
+
+            br.close();
+
+        } catch (IOException e) {
+            System.out.println("IOException while reading file: " + e.getMessage());
+        }
+    }
+
+    // UPDATE marks4 and marks5
+    static void updateMarks(String studentId, int marks4, int marks5) {
+
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(fileName));
+            List<String> lines = new ArrayList<>();
+            String line;
+
+            while ((line = br.readLine()) != null) {
+
+                if (line.startsWith(studentId + ",")) {
+                    String[] data = line.split(",");
+                    data[6] = String.valueOf(marks4);
+                    data[7] = String.valueOf(marks5);
+
+                    line = String.join(",", data);
+
+                    System.out.println("Updated marks for Student ID: " + studentId);
+                }
+
+                lines.add(line);
+            }
+
+            br.close();
+
+            FileWriter fw = new FileWriter(fileName);
+            for (String l : lines) {
+                fw.write(l + "\n");
+            }
+            fw.close();
+
+        } catch (IOException e) {
+            System.out.println("IOException while updating marks: " + e.getMessage());
+        }
+    }
+
+    // Calculate percentage and update CSV
+    static void calculatePercentage() {
+
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(fileName));
+            List<String> lines = new ArrayList<>();
+            String line;
+
+            // Header
+            lines.add(br.readLine());
+
+            while ((line = br.readLine()) != null) {
+                String[] data = line.split(",");
+
+                int m1 = Integer.parseInt(data[3]);
+                int m2 = Integer.parseInt(data[4]);
+                int m3 = Integer.parseInt(data[5]);
+                int m4 = Integer.parseInt(data[6]);
+                int m5 = Integer.parseInt(data[7]);
+
+                double percentage = (m1 + m2 + m3 + m4 + m5) / 5.0;
+
+                data[8] = String.format("%.2f", percentage);
+
+                lines.add(String.join(",", data));
+            }
+
+            br.close();
+
+            FileWriter fw = new FileWriter(fileName);
+            for (String l : lines) {
+                fw.write(l + "\n");
+            }
+            fw.close();
+
+            System.out.println("Percentage updated successfully.");
+
+        } catch (IOException e) {
+            System.out.println("IOException while calculating percentage: " + e.getMessage());
+        }
+    }
+
+    // DELETE
+    static void deleteStudent(String studentId) {
+
+        try {
+            BufferedReader br = new BufferedReader(new FileReader(fileName));
+            List<String> lines = new ArrayList<>();
+            String line;
+
+            while ((line = br.readLine()) != null) {
+
+                if (!line.startsWith(studentId + ",")) {
+                    lines.add(line);
+                } else {
+                    System.out.println("Deleted Student ID: " + studentId);
+                }
+            }
+
+            br.close();
+
+            FileWriter fw = new FileWriter(fileName);
+            for (String l : lines) {
+                fw.write(l + "\n");
+            }
+            fw.close();
+
+        } catch (IOException e) {
+            System.out.println("IOException while deleting student: " + e.getMessage());
+        }
+    }
+
+    // To show exception condition
+    static void readWrongFile() {
+        try {
+            BufferedReader br = new BufferedReader(new FileReader("WrongFile.csv"));
+            br.close();
+
+        } catch (IOException e) {
+            System.out.println("Exception Caught: " + e);
+        }
+    }
+}
